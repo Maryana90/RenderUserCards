@@ -1,5 +1,3 @@
-//script.async = false;
-
 let roles = {
         admin: "https://www.flaticon.com/svg/static/icons/svg/1424/1424453.svg",
         student: "https://www.flaticon.com/svg/static/icons/svg/1424/1424424.svg",
@@ -105,25 +103,27 @@ let users = [
         }
     ]
 
-
+    
 class User{
-    constructor(user){
+    constructor(user,role){
         this.user = user;
+        this.role = role;
     }
-
     render(){
-        let userBlock = `<div class="users">
-            ${this.user
-                    .map(uInfo=>`<div class="user">${this.method(uInfo)}</div>`)
-                    .join('')
+        let userFiltered = [];
+        this.user
+            .filter(usInfo=>{
+                if(usInfo.role==this.role){
+                    userFiltered.push(usInfo);
                 }
-        </div>`
+            })
+        let userBlock =`${userFiltered
+            .map(uInfo=>`<div class="user">${this.userInfo(uInfo)}${this.userCourses(uInfo)}</div>`)
+            .join('')}`
         document.write(userBlock);
     }
-
-    method(uInfo){
-        return `
-        <div class="user__info">
+    userInfo(uInfo){
+        return `<div class="user__info">
             <div class="user__info--data">
                 <img src=${uInfo.img} alt="${uInfo.role}" width=50>
                 <div class="user__naming">
@@ -131,52 +131,97 @@ class User{
                     <p>Age: <b>${uInfo.age}</b></p>
                 </div>
             </div>
-            <div class="user__info--role student">
+            <div class="user__info--role ${uInfo.role}">
             <img src="${roles[uInfo.role]}" width=25>
             <p>${uInfo.role}</p>
             </div>
         </div>`
     }
-        
+    userCourses(){
+        return ""
+    }
+
+    userGradation(level){
+        if (level<gradation[0][gradation[0].length-1]){
+            return `<span class="satisfactory">Satisfactory</span>`
+        } else{
+            if(level>=gradation[1][0] && level<gradation[1][gradation[1].length-1]){
+                return `<span class="good">Good</span>`
+        } 
+        else{
+            if(level>=gradation[2][0] && level<gradation[2][gradation[2].length-1]){
+                return `<span class="very-good">Very good</span>`
+        }
+        else{
+            if(level>=gradation[3][0] && level<=gradation[3][gradation[3].length-1]){
+                return `<span class="excellent">Excellent</span>`}}} 
+        }
+    }
 }
 
-let Users = new User (users);
-Users.render();
+class Student extends User{
+    constructor(user,role="student"){
+        super(user,role="student");
+    }
+    userCourses(uInfo){
+        if(uInfo.courses){
+            return `
+            <div class="user__courses admin--info">
+                ${uInfo.courses
+                    .map(course=>`<div class="user__courses--course ${uInfo.role}">${this.usCoorse(course)}</div>`)
+                    .join('')}
+            </div>`
+        } else {
+            return ""
+        }
+    }
+    usCoorse(course){
+        return `<p>Title: <b>${course.title} <b>${this.userGradation(course.mark)}</b></b></p>`
+    }
+}
 
+class Admin extends User{
+    constructor(user,role="admin"){
+        super(user,role="admin");
+    }
+    userCourses(uInfo){
+        return `<div class="user__courses admin--info">
+            ${uInfo.courses
+                .map(course=>`<div class="user__courses--course ${uInfo.role}">${this.usCoorse(course)}</div>`)
+                .join('')}
+            </div>`
+        }
+    usCoorse(course){
+        return `<p>Title: <b>${course.title}</b></p>
+                <p>Admin's score: <b>${this.userGradation(course.score)}</b></p>
+                <p>Lector: <b>${course.lector}</b></p>`
+    }
+}
 
-// method(uInfo){
-//     return `<div class="user__naming">
-        
-//         
-//             <p>Name: <b>${uInfo.name}</b></p>
-//             <p>Age: <b>${uInfo.age}</b></p>
-//     
-// }
+class Lector extends User{
+    constructor(user,role="lector"){
+        super(user,role="lector");
+    }
+    userCourses(uInfo){
+        return `<div class="user__courses admin--info">
+            ${uInfo.courses
+                .map(course=>`<div class="user__courses--course ${uInfo.role}">${this.usCoorse(course)}</div>`)
+                .join('')}
+            </div>`
+        }
+    usCoorse(course){
+        return `<p>Title: <b>${course.title}</b></p>
+                <p>Lector's score: <b>${this.userGradation(course.score)}</b></p>
+                <p>Average student's score: <b>${this.userGradation(course.studentsScore)}</b></b></p>`
+    }
+}
 
+let Students = new Student (users);
+Students.render();
 
-//<div class="user__info"> </div>
+let Admins = new Admin (users);
+Admins.render();
 
-
-// class User{
-//     constructor(us){
-//         this.us = us;
-//     }
-
-//     render(){
-//         let foo = `<div>
-//             <h2>${this.us
-//                 .map(uss=>this.method(uss))
-//                 .join('')
-//                 }     
-//             </h2>     
-//         </div>`
-//         document.write(foo);
-//     }
-//     method(uss){
-//         return `<p>${uss.name}</p>`
-//     }
-// }
-
-//     let userss = new User(users);
-//     userss.render();
+let Lectors = new Lector (users);
+Lectors.render();
 
